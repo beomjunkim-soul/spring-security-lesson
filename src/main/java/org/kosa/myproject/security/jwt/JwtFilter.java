@@ -18,7 +18,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
+    JwtFilter- 모든 요청에 대한 JWT (인증 토큰) 검증 필터
 
+    JWT 인증 플로우 정리
+    1. 클라이언트 - 서버에 요청헤드 : Authorization: Bearer token 에 요청
+       베어러(Bearer) 토큰은 토큰을 소유한 사람에게 접근 권한을 부여하는 보안 토큰의 한 종류
+       Bearer 사전적 의미 : 소유자 , 즉 이 토큰을 소유한 소유자에게 접근 권한을 부여하라
+    2. JwtFilter 가 위처럼 전달된 jwt 를 검증
+    3. 유효한 토큰 : Spring Security Context 에 인증 정보 저장
+    4. Controller / service 등에서 Security Context 에 저장된 인증 정보 사용
+    5. 응답 후 SecurityContext 자동 제거 ( Stateless 유지 )
  */
 
 @Slf4j

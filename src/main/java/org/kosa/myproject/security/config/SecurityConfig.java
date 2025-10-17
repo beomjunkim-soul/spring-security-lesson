@@ -31,7 +31,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     // JWT 토큰 생성 및 검증 유틸리티
     private final JwtUtil jwtUtil;
-   // 예외 핸들러들
+    // 예외 핸들러들
     /*
     Spring Security의 Filter는 DispatcherServlet 이전에 실행됩니다
     @ControllerAdvice는 Controller 레벨의 예외만 처리 가능합니다
@@ -79,15 +79,20 @@ public class SecurityConfig {
         http.formLogin(auth -> auth.disable());
         http.httpBasic(auth -> auth.disable());
 
-
+        //////////////////////인증 인가에 대한 설정 (개발자가 주로 확인하는 부분)//////////////////////////
         http.authorizeHttpRequests(auth -> auth
                 //로그인 허용
                 .requestMatchers("/api/auth/login").permitAll()
-               
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-
-
+                .requestMatchers("/api/health").permitAll() // aws health check 를 위해
+                // POST 방식 의 회원 가입은 인증없이 허용
+                .requestMatchers(HttpMethod.POST,"/api/members").permitAll()
+                // 관리자 모드는 인증과 ROLE_ADMIN 권한이 필요하다
+                // "ROLE_" 은 자동 삽입
+                .requestMatchers("/admin").hasRole("ADMIN")
+                // GET 방식 , 전체 게시글 조회는 인증 없이 접근을 모두 허용
+                .requestMatchers(HttpMethod.GET,"/api/posts").permitAll()
+                // 참고 /api/products, /api/products/** 경로에 대한 접근을 모두 허용합니다
+                .requestMatchers("/api/products","/api/products/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/api-docs/**").permitAll()
                 // 나머지 모든 요청은 인증 필요
@@ -104,6 +109,7 @@ public class SecurityConfig {
 
         // JWTFilter를 LoginFilter 이전에 추가합니다.
         // 이 필터가 먼저 실행되어 요청 헤더의 JWT 토큰을 검증하고 인증 정보를 설정합니다.
+        // JWTFilter 에서 토큰이 없으면 이후 loginFilter 에서 한번 더 필터링 실행
         http.addFilterBefore(new JwtFilter(jwtUtil), JsonLoginFilter.class);
 
         // Spring Security의 UsernamePasswordAuthenticationFilter 자리에 커스텀 JsonLoginFilter 추가합니다.
@@ -116,31 +122,33 @@ public class SecurityConfig {
     }
 
     /**
-     * *CORS(Cross-Origin Resource Sharing) 설정
-     * *
-     * * CORS란?
-     * * - 다른 도메인에서 API를 호출할 때 필요한 보안 정책
-     * * - React(localhost:3000) → Spring Boot(localhost:8080) 통신 허용
+     * CORS(Cross-Origin Resource Sharing) 설정
+     *
+     * CORS란?
+     * - 다른 도메인에서 API를 호출할 때 필요한 보안 정책
      */
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
         CorsConfiguration config = new CorsConfiguration();
+        // Amplify 도메인 허용, AWS Amplify 는 AWS CloudFront에 의해 https가 적용됨
+        config.addAllowedOriginPattern("https://*.amplifyapp.com");
+        // 로컬 개발 환경
+        config.addAllowedOriginPattern("http://localhost:*");
+
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:5173"); // 리액트 앱의 출처
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
-        //이 부분을 추가하면 브라우저 콘솔창에 토큰 정보를 직접 확인할 있다
+        /*
+           토큰 기반 인증/인가 시스템(JWT 등)을 사용하고,
+           서버가 응답 헤더에 토큰 정보를 담아 보낼 때,
+           프론트엔드(클라이언트) JavaScript 코드가 그 토큰을 읽어 저장하기 위한 설정
+         */
         config.addExposedHeader("Authorization");
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-
     }
 }
-
-
-
-
-

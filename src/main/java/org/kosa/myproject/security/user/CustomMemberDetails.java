@@ -12,7 +12,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- 
+    CustomMemberDetails : Spring Security  의 UserDetails 구현체
+                why ? Spring Security 가 이해할 수 있는 회원(사용자) 정보 형식
+                    예) Servlet Interface 를 구현한 웹프로그램은
+                        Web Container 가 service() 라는 단일한 방식으로 실행한다
+    즉 Spring Security 가 표준화된 방식으로 사용자 정보를 관리하기 위해
  */
 @Slf4j
 @Getter

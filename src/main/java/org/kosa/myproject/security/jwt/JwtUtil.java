@@ -12,7 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
- 
+    JWTUtil - Jwt 토큰 생성 및 검증 유틸리티
+    Jwt 구조 : 3가지
+    -Header : 토큰 타입과 알고리즘 정보
+    -Payload : 사용자 정보(Claims)
+    -Signature : 서명 ===> 위 변조 방지용 서명
  */
 @Component
 @Slf4j

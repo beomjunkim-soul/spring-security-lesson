@@ -26,7 +26,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
-
+ * JSON 형식의 로그인 요청을 처리하는 필터
+    /api/auth/login 의 엔드 포인트로 오는 로그인 요청처리
+    기존 FORM 로그인 대신 JSON 본문을 파싱해서 처리
  */
 @Slf4j
 public class JsonLoginFilter extends UsernamePasswordAuthenticationFilter {

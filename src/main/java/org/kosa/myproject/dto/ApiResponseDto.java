@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class ApiResponseDto<T> {
     private final boolean success;
     private final String message;
-    private final T data;
+    private final T data; // T -> generic
     private final String code;
     private final LocalDateTime timestamp;
 
